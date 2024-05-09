@@ -78,8 +78,7 @@ router.get("/lectures", instructorAuthMiddleware, async(req: InstructorAuthReque
     })
 })
 
-router.get("/courses", instructorAuthMiddleware, async(req: InstructorAuthRequest, res: Response) => {
-    const instrucotrId = req.instructorId
+router.get("/courses", instructorAuthMiddleware, async(req: Request, res: Response) => {
 
     const courses = await Course.find({})
 

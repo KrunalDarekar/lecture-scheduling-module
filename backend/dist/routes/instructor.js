@@ -78,7 +78,6 @@ router.get("/lectures", middleware_1.instructorAuthMiddleware, (req, res) => __a
     });
 }));
 router.get("/courses", middleware_1.instructorAuthMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const instrucotrId = req.instructorId;
     const courses = yield db_1.Course.find({});
     res.status(200).json({
         courses

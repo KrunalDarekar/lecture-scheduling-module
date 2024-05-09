@@ -144,9 +144,19 @@ router.post("/lecture", middleware_1.adminAuthMiddleware, (req, res) => __awaite
     });
 }));
 router.get("/courses", middleware_1.adminAuthMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const instrucotrId = req.instructorId;
     const courses = yield db_1.Course.find({});
     res.status(200).json({
         courses
+    });
+}));
+router.get("/instructors", middleware_1.adminAuthMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const filter = req.query.filter || "";
+    const instructors = yield db_1.Instructor.find({
+        username: {
+            "$regex": filter, "$options": 'i'
+        }
+    });
+    res.status(200).json({
+        instructors
     });
 }));

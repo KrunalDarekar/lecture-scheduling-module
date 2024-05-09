@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express"
 import jwt from "jsonwebtoken"
-import { Admin, Course, Lecture } from "../db"
+import { Admin, Course, Instructor, Lecture } from "../db"
 import { jwt_secret } from "../config"
 import { InstructorAuthRequest, adminAuthMiddleware } from "./middleware"
 
@@ -166,13 +166,26 @@ router.post("/lecture", adminAuthMiddleware, async(req: Request, res: Response) 
     })
 })
 
-router.get("/courses", adminAuthMiddleware , async(req: InstructorAuthRequest, res: Response) => {
-    const instrucotrId = req.instructorId
+router.get("/courses", adminAuthMiddleware , async(req: Request, res: Response) => {
 
     const courses = await Course.find({})
 
     res.status(200).json({
         courses
+    })
+})
+
+router.get("/instructors", adminAuthMiddleware, async(req: Request, res: Response) => {
+    const filter = req.query.filter || ""
+
+    const instructors = await Instructor.find({
+        username: {
+            "$regex": filter , "$options" : 'i'
+        }
+    })
+
+    res.status(200).json({
+        instructors
     })
 })
 
