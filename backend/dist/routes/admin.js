@@ -16,13 +16,11 @@ exports.adminRouter = void 0;
 const express_1 = __importDefault(require("express"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const db_1 = require("../db");
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-const jwt_secret = process.env.JWT_SECRET || "";
+const config_1 = require("../config");
+const middleware_1 = require("./middleware");
 const router = express_1.default.Router();
 exports.adminRouter = router;
 router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.body.username);
     const username = req.body.username;
     const password = req.body.password;
     const existing = yield db_1.Admin.findOne({ username });
@@ -39,10 +37,79 @@ router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function*
     const adminId = admin._id;
     const token = jsonwebtoken_1.default.sign({
         adminId: adminId,
-        type: admin,
-    }, jwt_secret);
+        type: "admin",
+    }, config_1.jwt_secret);
     return res.status(201).json({
         message: "admin created",
         token: token
+    });
+}));
+router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const username = req.body.username;
+    const password = req.body.password;
+    const admin = yield db_1.Admin.findOne({
+        username,
+        password
+    });
+    if (admin) {
+        const adminId = admin._id;
+        const token = jsonwebtoken_1.default.sign({
+            adminId: adminId,
+            type: "admin",
+        }, config_1.jwt_secret);
+        return res.status(200).json({
+            message: "signed in",
+            token: token
+        });
+    }
+    else {
+        res.status(411).json({
+            message: "Error while logging in"
+        });
+    }
+}));
+router.post("/course", middleware_1.adminAuthMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { name, level, description, image, lectures } = req.body;
+    if (!name || !level || !description || !image) {
+        return res.status(400).json({
+            message: 'All fields are required: name, level, description, and image',
+        });
+    }
+    const newCourse = new db_1.Course({
+        name,
+        level,
+        description,
+        image,
+    });
+    if (lectures && lectures.length > 0) {
+        for (const lecture of lectures) {
+            const { instructor, date } = lecture;
+            if (!instructor || !date) {
+                return res.status(400).json({
+                    message: 'Each lecture must have an instructor and date',
+                });
+            }
+            const existingLecture = yield db_1.Lecture.findOne({
+                instructor,
+                date,
+            });
+            if (existingLecture) {
+                return res.status(409).json({
+                    message: `Instructor already has a lecture scheduled on ${date}`,
+                });
+            }
+            const newLecture = new db_1.Lecture({
+                course: newCourse._id,
+                instructor,
+                date,
+            });
+            yield newLecture.save();
+            newCourse.lectures.push(newLecture._id);
+        }
+    }
+    const savedCourse = yield newCourse.save();
+    res.status(201).json({
+        message: 'Course created successfully',
+        course: savedCourse,
     });
 }));

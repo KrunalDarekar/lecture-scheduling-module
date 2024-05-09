@@ -65,7 +65,11 @@ const CourseSchema = new Schema({
         type: String,
         required: true
     },
-    lectures: [LectureSchema]
+    lectures: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Lecture',
+            required: true,
+        }]
 }, { timestamps: true });
 const Admin = mongoose_1.default.model('Admin', AdminSchema);
 exports.Admin = Admin;

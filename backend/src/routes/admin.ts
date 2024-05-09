@@ -1,11 +1,9 @@
 import express, { Request, Response } from "express"
 import jwt from "jsonwebtoken"
-import { Admin } from "../db"
-import  dotenv from "dotenv"
+import { Admin, Course, Lecture } from "../db"
+import { jwt_secret } from "../config"
+import { adminAuthMiddleware } from "./middleware"
 
-dotenv.config()
-
-const jwt_secret = process.env.JWT_SECRET || ""
 const router = express.Router()
 
 router.post("/signup", async(req:Request, res: Response) => {
@@ -31,7 +29,7 @@ router.post("/signup", async(req:Request, res: Response) => {
 
     const token = jwt.sign({
         adminId: adminId,
-        type: admin,
+        type: "admin",
     }, jwt_secret)
 
     return res.status(201).json({
@@ -54,7 +52,7 @@ router.post("/signin", async(req: Request, res: Response) => {
 
         const token = jwt.sign({
             adminId: adminId,
-            type: admin,
+            type: "admin",
         }, jwt_secret)
 
         return res.status(200).json({
@@ -67,6 +65,65 @@ router.post("/signin", async(req: Request, res: Response) => {
         })
     }
 
+})
+
+router.post("/course", adminAuthMiddleware , async(req: Request, res: Response) => {
+    const {name, level, description, image, lectures} = req.body
+
+        if (!name || !level || !description || !image) {
+            return res.status(400).json({
+                message: 'All fields are required: name, level, description, and image',
+            })
+        }
+
+        const newCourse = new Course({
+            name,
+            level,
+            description,
+            image,
+        })
+
+        if (lectures && lectures.length > 0) {
+
+            for (const lecture of lectures) {
+                const { instructor, date } = lecture;
+
+                if (!instructor || !date) {
+                    return res.status(400).json({
+                        message: 'Each lecture must have an instructor and date',
+                    })
+                }
+
+                const existingLecture = await Lecture.findOne({
+                    instructor,
+                    date,
+                })
+
+                if (existingLecture) {
+                    return res.status(409).json({
+                        message: `Instructor already has a lecture scheduled on ${date}`,
+                    })
+                }
+
+                const newLecture = new Lecture({
+                    course: newCourse._id,
+                    instructor,
+                    date,
+                })
+
+                await newLecture.save();
+
+                newCourse.lectures.push(newLecture._id);
+            }
+
+        }
+
+        const savedCourse = await newCourse.save()
+
+        res.status(201).json({
+            message: 'Course created successfully',
+            course: savedCourse,
+        })
 })
 
 export { router as adminRouter }

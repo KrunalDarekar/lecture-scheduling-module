@@ -16,9 +16,7 @@ exports.instructorRouter = void 0;
 const express_1 = __importDefault(require("express"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const db_1 = require("../db");
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-const jwt_secret = process.env.JWT_SECRET || "";
+const config_1 = require("../config");
 const router = express_1.default.Router();
 exports.instructorRouter = router;
 router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -38,10 +36,34 @@ router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function*
     const instructorId = instructor._id;
     const token = jsonwebtoken_1.default.sign({
         instructorId: instructorId,
-        type: instructor,
-    }, jwt_secret);
+        type: "instructor",
+    }, config_1.jwt_secret);
     return res.status(201).json({
         message: "instructor created",
         token: token
     });
+}));
+router.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const username = req.body.username;
+    const password = req.body.password;
+    const instructor = yield db_1.Instructor.findOne({
+        username,
+        password
+    });
+    if (instructor) {
+        const instructorId = instructor._id;
+        const token = jsonwebtoken_1.default.sign({
+            instructorId: instructorId,
+            type: "instructor",
+        }, config_1.jwt_secret);
+        return res.status(200).json({
+            message: "signed in",
+            token: token
+        });
+    }
+    else {
+        res.status(411).json({
+            message: "Error while logging in"
+        });
+    }
 }));
