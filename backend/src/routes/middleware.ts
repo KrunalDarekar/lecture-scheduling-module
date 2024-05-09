@@ -10,7 +10,6 @@ const adminAuthMiddleware = (req: Request, res: Response, next: NextFunction) =>
 
     const tokenArr = authHeader.split(" ")
     const decoded= jwt.verify(tokenArr[1], jwt_secret)
-    console.log(decoded)
 
     if (typeof decoded !== 'string' && decoded.type === "admin") {
         next()
@@ -21,7 +20,7 @@ const adminAuthMiddleware = (req: Request, res: Response, next: NextFunction) =>
     }
 }
 
-interface InstructorAuthRequest extends Request {
+export interface InstructorAuthRequest extends Request {
     instructorId?: string;
 }
 
@@ -35,7 +34,7 @@ const instructorAuthMiddleware = (req: InstructorAuthRequest, res: Response, nex
     const decoded= jwt.verify(tokenArr[1], jwt_secret)
 
     if (typeof decoded !== 'string' && decoded.type === "instructor") {
-        req.instructorId = decoded.instrucotrId
+        req.instructorId = decoded.instructorId
         next()
     } else {
         return res.status(403).json({

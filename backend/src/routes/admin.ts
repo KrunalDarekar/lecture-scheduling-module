@@ -2,7 +2,7 @@ import express, { Request, Response } from "express"
 import jwt from "jsonwebtoken"
 import { Admin, Course, Lecture } from "../db"
 import { jwt_secret } from "../config"
-import { adminAuthMiddleware } from "./middleware"
+import { InstructorAuthRequest, adminAuthMiddleware } from "./middleware"
 
 const router = express.Router()
 
@@ -70,60 +70,110 @@ router.post("/signin", async(req: Request, res: Response) => {
 router.post("/course", adminAuthMiddleware , async(req: Request, res: Response) => {
     const {name, level, description, image, lectures} = req.body
 
-        if (!name || !level || !description || !image) {
-            return res.status(400).json({
-                message: 'All fields are required: name, level, description, and image',
-            })
-        }
-
-        const newCourse = new Course({
-            name,
-            level,
-            description,
-            image,
+    if (!name || !level || !description || !image) {
+        return res.status(400).json({
+            message: 'All fields are required: name, level, description, and image',
         })
+    }
 
-        if (lectures && lectures.length > 0) {
+    const newCourse = new Course({
+        name,
+        level,
+        description,
+        image,
+    })
 
-            for (const lecture of lectures) {
-                const { instructor, date } = lecture;
+    if (lectures && lectures.length > 0) {
 
-                if (!instructor || !date) {
-                    return res.status(400).json({
-                        message: 'Each lecture must have an instructor and date',
-                    })
-                }
+        for (const lecture of lectures) {
 
-                const existingLecture = await Lecture.findOne({
-                    instructor,
-                    date,
+            const { instructor, date } = lecture;
+
+            if (!instructor || !date) {
+                return res.status(400).json({
+                    message: 'Each lecture must have an instructor and date',
                 })
-
-                if (existingLecture) {
-                    return res.status(409).json({
-                        message: `Instructor already has a lecture scheduled on ${date}`,
-                    })
-                }
-
-                const newLecture = new Lecture({
-                    course: newCourse._id,
-                    instructor,
-                    date,
-                })
-
-                await newLecture.save();
-
-                newCourse.lectures.push(newLecture._id);
             }
 
+            const existingLecture = await Lecture.findOne({
+                instructor,
+                date,
+            })
+
+            if (existingLecture) {
+                return res.status(409).json({
+                    message: `Instructor already has a lecture scheduled on ${date}`,
+                })
+            }
+
+            const newLecture = new Lecture({
+                course: newCourse._id,
+                instructor,
+                date,
+            })
+
+            await newLecture.save();
+
+            newCourse.lectures.push(newLecture._id);
         }
 
-        const savedCourse = await newCourse.save()
+    }
 
-        res.status(201).json({
-            message: 'Course created successfully',
-            course: savedCourse,
+    const savedCourse = await newCourse.save()
+
+    res.status(201).json({
+        message: 'Course created successfully',
+        course: savedCourse,
+    })
+})
+
+router.post("/lecture", adminAuthMiddleware, async(req: Request, res: Response) => {
+    const {courseId, instructor, date} = req.body
+
+    const existingLecture = await Lecture.findOne({
+        instructor,
+        date,
+    })
+
+    if (existingLecture) {
+        return res.status(409).json({
+            message: `Instructor already has a lecture scheduled on ${date}`,
         })
+    }
+
+    const course = await Course.findById(courseId)
+
+    if(!course) {
+        return res.status(404).json({
+            message: "course not found"
+        })
+    }
+
+    const newLecture = new Lecture({
+        course: courseId,
+        instructor,
+        date,
+    })
+
+    course.lectures.push(newLecture._id)
+
+    await course.save()
+    const savedLecture = await newLecture.save()
+
+    res.status(201).json({
+        message: "lecture added",
+        lecture: savedLecture
+    })
+})
+
+router.get("/courses", adminAuthMiddleware , async(req: InstructorAuthRequest, res: Response) => {
+    const instrucotrId = req.instructorId
+
+    const courses = await Course.find({})
+
+    res.status(200).json({
+        courses
+    })
 })
 
 export { router as adminRouter }

@@ -13,7 +13,6 @@ const adminAuthMiddleware = (req, res, next) => {
     }
     const tokenArr = authHeader.split(" ");
     const decoded = jsonwebtoken_1.default.verify(tokenArr[1], config_1.jwt_secret);
-    console.log(decoded);
     if (typeof decoded !== 'string' && decoded.type === "admin") {
         next();
     }
@@ -32,7 +31,7 @@ const instructorAuthMiddleware = (req, res, next) => {
     const tokenArr = authHeader.split(" ");
     const decoded = jsonwebtoken_1.default.verify(tokenArr[1], config_1.jwt_secret);
     if (typeof decoded !== 'string' && decoded.type === "instructor") {
-        req.instructorId = decoded.instrucotrId;
+        req.instructorId = decoded.instructorId;
         next();
     }
     else {

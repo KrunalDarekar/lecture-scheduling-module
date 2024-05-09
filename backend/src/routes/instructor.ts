@@ -1,7 +1,8 @@
 import express, { Request, Response } from "express"
 import jwt from "jsonwebtoken"
-import { Instructor } from "../db"
+import { Course, Instructor, Lecture } from "../db"
 import { jwt_secret } from "../config"
+import { InstructorAuthRequest, instructorAuthMiddleware } from "./middleware"
 
 const router = express.Router()
 
@@ -63,6 +64,28 @@ router.post("/signin", async(req: Request, res: Response) => {
         })
     }
 
+})
+
+router.get("/lectures", instructorAuthMiddleware, async(req: InstructorAuthRequest, res: Response) => {
+    const instrucotrId = req.instructorId
+
+    const lectures = await Lecture.find({
+        instructor: instrucotrId
+    })
+
+    res.status(200).json({
+        lectures
+    })
+})
+
+router.get("/courses", instructorAuthMiddleware, async(req: InstructorAuthRequest, res: Response) => {
+    const instrucotrId = req.instructorId
+
+    const courses = await Course.find({})
+
+    res.status(200).json({
+        courses
+    })
 })
 
 export { router as instructorRouter }
