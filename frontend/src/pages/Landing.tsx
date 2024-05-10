@@ -12,7 +12,7 @@ const Landing = () => {
     const isSignedIn = useRecoilValue(isSignedInAtom);
 
     useEffect(() => {
-        if (user) {
+        if (user && isSignedIn) {
             if (user.type === "admin") {
                 navigate("/admin");
             } else if (user.type === "instructor") {

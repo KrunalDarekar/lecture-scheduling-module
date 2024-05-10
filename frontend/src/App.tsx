@@ -11,6 +11,8 @@ import axios from 'axios'
 import { base_url } from './config'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { isSignedInAtom, userAtom } from './state/atoms'
+import Course from './pages/Course'
+import CreateCourse from './pages/CreateCourse'
 
 function App() {
 
@@ -44,6 +46,8 @@ function App() {
           </Route>
           <Route path='/admin' element={<AdminDash/>}></Route>
           <Route path='/instructor' element={<InstructorDash/>}></Route>
+          <Route path='/course/:id' element={<Course/>}></Route>
+          <Route path='/create' element={<CreateCourse/>}></Route>
         </Routes>
       </BrowserRouter>
     </>

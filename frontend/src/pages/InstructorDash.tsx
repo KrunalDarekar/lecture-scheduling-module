@@ -1,8 +1,9 @@
+import Header from "@/components/ui/Header";
 
 const InstructorDash = () => {
     return (
         <div>
-            instructor
+            <Header/>
         </div>
     )
 };
