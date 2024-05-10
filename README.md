@@ -17,7 +17,7 @@ An online lecture scheduling module built for a take-home assignment.
 ### Accessible to Admin
 
 - [Admin Dashboard `/admin`](https://lecture-scheduling-module.vercel.app/admin): Admin dashboard.
-- [Course Details `/course/:id`](https://lecture-scheduling-module.vercel.app/course/): Displays the details of a specific course by its ID and allows you to add more lectures.
+- Course Details `/course/:id`: Displays the details of a specific course by its ID and allows you to add more lectures.
 - [Create Course `/create`](https://lecture-scheduling-module.vercel.app/create): Lets you create a new course.
 
 ### Accessible to Instructor
