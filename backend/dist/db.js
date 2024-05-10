@@ -62,8 +62,17 @@ const CourseSchema = new Schema({
         required: true
     },
     image: {
-        type: String,
-        required: true
+        type: {
+            url: {
+                type: String,
+                required: true,
+            },
+            publicId: {
+                type: String,
+                required: true,
+            },
+        },
+        required: true,
     },
     lectures: [{
             type: Schema.Types.ObjectId,

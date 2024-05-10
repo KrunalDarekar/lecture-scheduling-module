@@ -1,4 +1,5 @@
 import { base_url } from "@/config"
+import { Image } from "@/pages/CreateCourse"
 import axios from "axios"
 import { useEffect, useState } from "react"
 
@@ -7,7 +8,7 @@ export interface Course  {
     name: string,
     level: 'Beginner' | 'Intermediate' | 'Advance',
     description: string,
-    image: string,
+    image: Image,
     lectures: string[]
 }
 

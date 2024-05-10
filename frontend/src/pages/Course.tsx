@@ -127,7 +127,7 @@ const Course = () => {
                 </CardHeader>
                 <CardContent>
                     <div className="mb-2">
-                        {course.image}
+                        <img src={course.image.url}></img>
                     </div>
                     <Separator className="mb-2"/>
                     <div>

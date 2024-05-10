@@ -18,6 +18,8 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const db_1 = require("../db");
 const config_1 = require("../config");
 const middleware_1 = require("./middleware");
+const multer_1 = __importDefault(require("multer"));
+const cloudinary_1 = require("cloudinary");
 const router = express_1.default.Router();
 exports.adminRouter = router;
 router.post("/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -200,4 +202,25 @@ router.get("/instructors", middleware_1.adminAuthMiddleware, (req, res) => __awa
     res.status(200).json({
         instructors
     });
+}));
+const upload = (0, multer_1.default)({ dest: 'uploads/' });
+cloudinary_1.v2.config({
+    cloud_name: config_1.CLOUD_NAME,
+    api_key: config_1.API_KEY,
+    api_secret: config_1.API_SECRET,
+});
+// Route to upload an image
+router.post('/image/upload', upload.single('image'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const file = req.file;
+    if (!file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+    }
+    const result = yield cloudinary_1.v2.uploader.upload(file.path);
+    const { public_id, url } = result;
+    res.status(200).json({ url, publicId: public_id });
+}));
+router.delete('/image/delete/:publicId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const publicId = req.params.publicId;
+    yield cloudinary_1.v2.uploader.destroy(publicId);
+    res.status(200).json({ message: 'Image deleted successfully' });
 }));

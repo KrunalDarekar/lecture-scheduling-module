@@ -12,7 +12,7 @@ import LevelBadge from "./LevelBadge";
 const CourseCard = ({course}:{course:Course}) => {
     return (
         <Link to={`/course/${course._id}`}>
-            <Card className="h-72">
+            <Card className="">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle>{course.name}</CardTitle>
@@ -24,7 +24,7 @@ const CourseCard = ({course}:{course:Course}) => {
                 </CardHeader>
                 <CardContent>
                     <div className="">
-                        {course.image}
+                        <img src={course.image.url} alt="" />
                     </div>
                 </CardContent>
             </Card>

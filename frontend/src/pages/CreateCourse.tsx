@@ -15,12 +15,17 @@ interface Lecture {
     date: string;
 }
 
+export interface Image {
+    url: string,
+    publicId: string,
+}
+
 const CreateCourse = () => {
     const token = localStorage.getItem('token')
     const [name, setName] = useState<string>('');
     const [level, setLevel] = useState<string>('Beginner');
     const [description, setDescription] = useState<string>('');
-    const [image, setImage] = useState<string>('');
+    const [image, setImage] = useState<Image>();
     const [lectures, setLectures] = useState<Lecture[]>([{ instructor: '', date: '' }]);
     const {instructors, loading} = useInstructors()
     const {toast} = useToast()
@@ -125,13 +130,7 @@ const CreateCourse = () => {
 
                 <div className="mb-2">
                     <Label className="text-base" htmlFor="image">Image:</Label>
-                    <Input
-                        type="text"
-                        id="image"
-                        value={image}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => setImage(e.target.value)}
-                        required
-                    />
+                    <ImageUploader uploadedImage={image} setUploadedImage={setImage} />
                 </div>
 
                 <div>
@@ -174,6 +173,86 @@ const CreateCourse = () => {
             </div>
         </div>
     );
+};
+
+const ImageUploader = ({uploadedImage, setUploadedImage}: {uploadedImage:Image | undefined, setUploadedImage: Function}) => {
+    const { toast } = useToast();
+
+    const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await axios.post(`${base_url}/admin/image/upload`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            setUploadedImage({
+                url: response.data.url,
+                publicId: response.data.publicId,
+            });
+
+            toast({
+                title: "Success!",
+                description: "Image uploaded successfully",
+            });
+        } catch (error: any) {
+            toast({
+                variant: "destructive",
+                title: "Uh oh something went wrong!",
+                description: error.response ? error.response.data.message : "Error uploading image",
+            });
+        }
+    };
+
+    const handleDeleteImage = async () => {
+        if (!uploadedImage) return;
+
+        try {
+            await axios.delete(`${base_url}/admin/image/delete/${uploadedImage.publicId}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            setUploadedImage(null);
+
+            toast({
+                title: "Success!",
+                description: "Image deleted successfully",
+            });
+        } catch (error: any) {
+            console.error('Error deleting image:', error);
+            toast({
+                variant: "destructive",
+                title: "Uh oh something went wrong!",
+                description: error.response ? error.response.data.message : "Error deleting image",
+            });
+        }
+    }
+
+    return (
+        <div>
+            {!uploadedImage && (
+                <input type="file" accept="image/*" onChange={handleFileChange} />
+            )}
+
+            {uploadedImage && (
+                <div>
+                    <img src={uploadedImage.url} alt="Uploaded" width="200" />
+                    <Button variant="destructive" onClick={handleDeleteImage}>
+                        Delete Image
+                    </Button>
+                </div>
+            )}
+        </div>
+    )
 };
 
 export default CreateCourse;

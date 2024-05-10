@@ -1,8 +1,11 @@
 import express, { Request, Response } from "express"
 import jwt from "jsonwebtoken"
 import { Admin, Course, Instructor, Lecture } from "../db"
-import { jwt_secret } from "../config"
-import { InstructorAuthRequest, adminAuthMiddleware } from "./middleware"
+import { API_KEY, API_SECRET, CLOUD_NAME, jwt_secret } from "../config"
+import { adminAuthMiddleware } from "./middleware"
+import multer from 'multer'
+import { v2 as cloudinary } from 'cloudinary'
+import { UploadedFile } from 'express-fileupload'
 
 const router = express.Router()
 
@@ -242,6 +245,36 @@ router.get("/instructors", adminAuthMiddleware, async(req: Request, res: Respons
     res.status(200).json({
         instructors
     })
+})
+
+const upload = multer({ dest: 'uploads/' })
+
+cloudinary.config({
+    cloud_name: CLOUD_NAME,
+    api_key: API_KEY,
+    api_secret: API_SECRET,
+})
+
+router.post('/image/upload', upload.single('image'), async (req: Request, res: Response) => {
+    const file = req.file as Express.Multer.File;
+
+    if (!file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const result = await cloudinary.uploader.upload(file.path);
+
+    const { public_id, url } = result;
+
+    res.status(200).json({ url, publicId: public_id });
+})
+
+router.delete('/image/delete/:publicId', async (req: Request, res: Response) => {
+    const publicId = req.params.publicId;
+
+    await cloudinary.uploader.destroy(publicId);
+
+    res.status(200).json({ message: 'Image deleted successfully' });
 })
 
 export { router as adminRouter }
