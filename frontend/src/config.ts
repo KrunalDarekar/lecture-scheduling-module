@@ -1,1 +1,1 @@
-export const base_url = "http://localhost:3000/api/v1"
+export const base_url = "https://lecture-scheduling-module.onrender.com/api/v1"
