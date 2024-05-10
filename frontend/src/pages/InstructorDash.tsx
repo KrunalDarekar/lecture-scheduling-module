@@ -1,5 +1,6 @@
 import Header from "@/components/ui/Header";
 import LevelBadge from "@/components/ui/LevelBadge";
+import Loader from "@/components/ui/Loader";
 import { Separator } from "@/components/ui/separator";
 import { base_url } from "@/config";
 import { Course, Lecture } from "@/hooks";
@@ -40,7 +41,7 @@ const InstructorDash = () => {
 
     if(!lectures || !courses) {
         return (
-            <div className="flex justify-center items-center h-screen">loading...</div>
+            <Loader/>
         )
     }
 

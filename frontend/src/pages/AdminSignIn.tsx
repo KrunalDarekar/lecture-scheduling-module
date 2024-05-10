@@ -22,11 +22,13 @@ const AdminSignIn = () => {
     const [password, setPassword] = useState("")
     const setUser = useSetRecoilState(userAtom)
     const setIsSignedIn = useSetRecoilState(isSignedInAtom)
+    const [loading, setLoading] = useState(false)
 
     const navigate = useNavigate()
     const {toast} = useToast()
 
     const handleLogIn = async() => {
+        setLoading(true)
         const requestBody = {
             username,
             password,
@@ -52,6 +54,7 @@ const AdminSignIn = () => {
             navigate('/')
 
         } catch (error) {
+            setLoading(false)
             toast({
                 variant: "destructive",
                 title: "Uh oh! something went wrong",
@@ -61,7 +64,10 @@ const AdminSignIn = () => {
     }
 
     return (
-        <div className="flex justify-center items-center h-screen">
+        <div className="flex flex-col justify-center items-center h-screen">
+            <div className="border p-2 w-[350px] mb-4 rounded border border-yellow-600 text-yellow-700 bg-yellow-100">
+                render.com's free servers shut down after 15 minutes of inactivity, you might need to wait for upto 50 seconds for the requests to go through
+            </div>
             <Card className="w-[350px]">
                 <div className="flex justify-center items-center">
                     <CardHeader>
@@ -88,7 +94,11 @@ const AdminSignIn = () => {
                     </form>
                 </CardContent>
                 <CardFooter className="flex justify-center items-cetner">
-                    <Button onClick={handleLogIn}>Log in</Button>
+                    {
+                        loading ?
+                        <Button disabled className="cursor-progress">Logging in...</Button> :
+                        <Button onClick={handleLogIn}>Log in</Button>
+                    }
                 </CardFooter>
             </Card>
         </div>

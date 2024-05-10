@@ -3,6 +3,7 @@ import { isSignedInAtom, userAtom } from "@/state/atoms";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import { useEffect } from "react";
+import Loader from "@/components/ui/Loader";
 
 const Landing = () => {
     const navigate = useNavigate();
@@ -33,7 +34,7 @@ const Landing = () => {
 
     return (
         <div>
-            landing
+            <Loader/>
         </div>
     );
 };

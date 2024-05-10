@@ -1,5 +1,6 @@
 import CourseCard from "@/components/ui/CourseCard";
 import Header from "@/components/ui/Header";
+import Loader from "@/components/ui/Loader";
 import { Button } from "@/components/ui/button";
 import { useCourses } from "@/hooks";
 import { useNavigate } from "react-router-dom";
@@ -9,9 +10,9 @@ const AdminDash = () => {
     const navigate = useNavigate()
 
     if(loading) {
-        return <div className="flex justify-center items-center h-screen">
-            loading...
-        </div>
+        return (
+            <Loader/>
+        )
     }
 
     return (

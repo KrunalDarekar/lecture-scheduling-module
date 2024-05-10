@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useInstructors } from "@/hooks";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
+import Loader from "@/components/ui/Loader";
 
 interface Lecture {
     instructor: string;
@@ -33,7 +34,7 @@ const CreateCourse = () => {
 
     if(loading) {
         return (
-            <div className="flex justify-center items-center h-screen">loading...</div>
+            <Loader/>
         )
     }
 

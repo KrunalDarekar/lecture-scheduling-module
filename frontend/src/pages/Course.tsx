@@ -31,6 +31,7 @@ import { ChangeEvent, useState } from "react";
 import axios from "axios";
 import { base_url } from "@/config";
 import { useToast } from "@/components/ui/use-toast";
+import Loader from "@/components/ui/Loader";
 
 const Course = () => {
 
@@ -104,9 +105,7 @@ const Course = () => {
 
     if(loading || !course || lectures.length < 1 || instructors.length < 1) {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <div>loading...</div>
-            </div>
+            <Loader/>
         )
     }
 
