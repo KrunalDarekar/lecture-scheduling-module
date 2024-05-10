@@ -79,10 +79,11 @@ export const useInstructors = () => {
     }
 }
 
-interface Lecture {
+export interface Lecture {
     _id: string,
     instructor: string,
     date: string,
+    course: string,
 }
 
 export const useLectures = () => {

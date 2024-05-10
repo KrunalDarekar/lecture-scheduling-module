@@ -71,7 +71,7 @@ router.get("/lectures", instructorAuthMiddleware, async(req: InstructorAuthReque
 
     const lectures = await Lecture.find({
         instructor: instrucotrId
-    })
+    }).sort({ date: 1})
 
     res.status(200).json({
         lectures

@@ -72,7 +72,7 @@ router.get("/lectures", middleware_1.instructorAuthMiddleware, (req, res) => __a
     const instrucotrId = req.instructorId;
     const lectures = yield db_1.Lecture.find({
         instructor: instrucotrId
-    });
+    }).sort({ date: 1 });
     res.status(200).json({
         lectures
     });

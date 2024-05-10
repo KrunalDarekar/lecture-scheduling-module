@@ -9,7 +9,7 @@ const AdminDash = () => {
     const navigate = useNavigate()
 
     if(loading) {
-        return <div>
+        return <div className="flex justify-center items-center h-screen">
             loading...
         </div>
     }

@@ -23,7 +23,7 @@ const Landing = () => {
 
     if (!token || !isSignedIn) {
         return (
-            <div className="flex justify-center items-center h-screen">
+            <div className="flex flex-col justify-center items-center h-screen">
                 <Button onClick={() => navigate('/signin/admin')} variant="outline"> Log in as an Admin</Button>
                 <div>or</div>
                 <Button onClick={() => navigate('/signin/instructor')} variant="outline"> Log in as an Instructor</Button>
