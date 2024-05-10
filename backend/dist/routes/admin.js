@@ -94,8 +94,14 @@ router.post("/course", middleware_1.adminAuthMiddleware, (req, res) => __awaiter
                 date,
             });
             if (existingLecture) {
+                for (const lecture of newCourse.lectures) {
+                    yield db_1.Lecture.deleteOne({
+                        _id: lecture
+                    });
+                }
+                const name = yield db_1.Instructor.findById(instructor);
                 return res.status(409).json({
-                    message: `Instructor already has a lecture scheduled on ${date}`,
+                    message: `${(name === null || name === void 0 ? void 0 : name.username) || "user"} already has a lecture scheduled on ${date}`,
                 });
             }
             const newLecture = new db_1.Lecture({
@@ -113,8 +119,25 @@ router.post("/course", middleware_1.adminAuthMiddleware, (req, res) => __awaiter
         course: savedCourse,
     });
 }));
+router.delete("/course/:id", middleware_1.adminAuthMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const courseId = req.params.id;
+    const course = yield db_1.Course.findById(courseId);
+    if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+    }
+    if (course.lectures && course.lectures.length > 0) {
+        yield db_1.Lecture.deleteMany({ _id: { $in: course.lectures } });
+    }
+    yield db_1.Course.deleteOne({ _id: courseId });
+    res.status(200).json({ message: "Course deleted successfully" });
+}));
 router.post("/lecture", middleware_1.adminAuthMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { courseId, instructor, date } = req.body;
+    if (!instructor.length || !date.length) {
+        return res.status(409).json({
+            message: `select date and instructor`,
+        });
+    }
     const existingLecture = yield db_1.Lecture.findOne({
         instructor,
         date,
@@ -143,10 +166,28 @@ router.post("/lecture", middleware_1.adminAuthMiddleware, (req, res) => __awaite
         lecture: savedLecture
     });
 }));
+router.get("/course/:id", middleware_1.adminAuthMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const courseId = req.params.id;
+    const course = yield db_1.Course.findById(courseId);
+    if (!course) {
+        return res.status(404).json({
+            message: "Course not found",
+        });
+    }
+    res.status(200).json({
+        course,
+    });
+}));
 router.get("/courses", middleware_1.adminAuthMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const courses = yield db_1.Course.find({});
     res.status(200).json({
         courses
+    });
+}));
+router.get("/lectures", middleware_1.adminAuthMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const lectures = yield db_1.Lecture.find({});
+    res.status(200).json({
+        lectures
     });
 }));
 router.get("/instructors", middleware_1.adminAuthMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {

@@ -101,8 +101,16 @@ router.post("/course", adminAuthMiddleware , async(req: Request, res: Response) 
             })
 
             if (existingLecture) {
+                for(const lecture of newCourse.lectures) {
+                    await Lecture.deleteOne({
+                        _id: lecture
+                    })
+                }
+
+                const name = await Instructor.findById(instructor)
+
                 return res.status(409).json({
-                    message: `Instructor already has a lecture scheduled on ${date}`,
+                    message: `${name?.username || "user"} already has a lecture scheduled on ${date}`,
                 })
             }
 
@@ -127,8 +135,32 @@ router.post("/course", adminAuthMiddleware , async(req: Request, res: Response) 
     })
 })
 
+router.delete("/course/:id", adminAuthMiddleware, async (req: Request, res: Response) => {
+     const courseId = req.params.id;
+
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+    }
+
+    if (course.lectures && course.lectures.length > 0) {
+        await Lecture.deleteMany({ _id: { $in: course.lectures } });
+    }
+
+    await Course.deleteOne({ _id: courseId });
+
+    res.status(200).json({ message: "Course deleted successfully" })
+})
+
 router.post("/lecture", adminAuthMiddleware, async(req: Request, res: Response) => {
     const {courseId, instructor, date} = req.body
+
+    if(!instructor.length || !date.length) {
+        return res.status(409).json({
+            message: `select date and instructor`,
+        })
+    }
 
     const existingLecture = await Lecture.findOne({
         instructor,
@@ -166,12 +198,35 @@ router.post("/lecture", adminAuthMiddleware, async(req: Request, res: Response) 
     })
 })
 
+router.get("/course/:id", adminAuthMiddleware, async (req: Request, res: Response) => {
+    const courseId = req.params.id
+    const course = await Course.findById(courseId)
+
+    if (!course) {
+        return res.status(404).json({
+            message: "Course not found",
+        });
+    }
+
+    res.status(200).json({
+        course,
+    })
+});
+
 router.get("/courses", adminAuthMiddleware , async(req: Request, res: Response) => {
 
     const courses = await Course.find({})
 
     res.status(200).json({
         courses
+    })
+})
+
+router.get("/lectures", adminAuthMiddleware, async(req: Request, res: Response) => {
+    const lectures = await Lecture.find({})
+
+    res.status(200).json({
+        lectures
     })
 })
 
