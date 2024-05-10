@@ -189,8 +189,8 @@ const Course = () => {
                             />
                         </div>
                         </div>
-                        <DialogFooter>
-                            <DialogClose asChild><Button onClick={handleAddLecture} type="submit">+ Add</Button></DialogClose>
+                        <DialogFooter className="w-full">
+                            <DialogClose asChild className="w-full"><Button className="w-full" onClick={handleAddLecture} type="submit">+ Add</Button></DialogClose>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
